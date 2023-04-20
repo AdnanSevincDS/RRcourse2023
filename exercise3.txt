@@ -1,0 +1,28 @@
+aadnansevinc@instance-1:~$ ps aux | grep cpu
+root          10  0.0  0.0      0     0 ?        I<   16:32   0:00 [mm_percpu_wq]
+root          18  0.0  0.0      0     0 ?        S    16:32   0:00 [cpuhp/0]
+root          19  0.0  0.0      0     0 ?        S    16:32   0:00 [cpuhp/1]
+aadnans+    1569  0.0  0.0   8168   720 pts/0    R+   17:02   0:00 grep --color=auto cpu
+aadnansevinc@instance-1:~$ tail -3 /proc/net/dev
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo:   11732     112    0    0    0     0          0         0    11732     112    0    0    0     0       0          0
+  ens4: 10622686    5105    0    0    0     0          0         0   726405    4433    0    0    0     0       0          0
+aadnansevinc@instance-1:~$ cd /etc/nvme
+aadnansevinc@instance-1:/etc/nvme$ pwd
+/etc/nvme
+aadnansevinc@instance-1:/etc/nvme$ head -3 example.txt
+head: cannot open 'example.txt' for reading: No such file or directory
+aadnansevinc@instance-1:/etc/nvme$ ip a | tail -n 3 
+       valid_lft 3285sec preferred_lft 3285sec
+    inet6 fe80::4001:aff:feb6:2/64 scope link 
+       valid_lft forever preferred_lft forever
+aadnansevinc@instance-1:/etc/nvme$ ls -l
+total 12
+-rw-r--r-- 1 root root 157 Sep  7  2020 discovery.conf
+-rw-r--r-- 1 root root  37 Mar  2 21:45 hostid
+-rw-r--r-- 1 root root  69 Mar  2 21:45 hostnqn
+aadnansevinc@instance-1:/etc/nvme$ cat discovery.conf | head -n 3
+# Used for extracting default parameters for discovery
+#
+# Example:
+aadnansevinc@instance-1:/etc/nvme$ 
