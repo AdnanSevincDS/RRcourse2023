@@ -1,0 +1,169 @@
+---
+title: "Metaanalysis assignment"
+author: "Adnan Sevinc"
+date: today
+format:  
+  html:
+    theme: lumen
+    toc: true
+    toc_float: true
+title-block-banner: true
+execute:
+  echo: fenced
+---
+
+```{r}
+#| label = "setup",
+#| include = FALSE
+
+packages_vector <- c(
+"meta","metafor","dplyr")
+
+package.check <- lapply(packages_vector, FUN = function(x) {
+  if(!require(x, character.only = TRUE)) {
+    install.packages(x, dependencies = TRUE)
+  }
+})
+```
+
+# Upload Dataset
+
+```{r}
+library(readxl)
+data <- read_excel("data/metaanalysis_data.xlsx")
+View(data)
+```
+# Review Dataset
+
+```{r}
+data[1:5,]
+```
+We can now use `meta::metagen` function to estimate the overall effect size. Type `?metagen` to check the possibilities. 
+
+# Boys Fixed Effect
+
+```{r}
+boys_FE <- meta::metagen(
+             TE=Mean_boys_play_male,
+             seTE=SD_boys_play_male,
+             data=data,
+             studlab=paste(Study),
+             comb.fixed = TRUE,
+             comb.random = FALSE)
+
+boys_FE
+```
+
+As p-value < 0.05 it is statistically significant
+
+# Meta Boys Mixed Effect
+
+```{r}
+meta_boys_mixed <- meta::metacont(
+                  n.e=N_boys,
+                  mean.e=Mean_boys_play_male,
+                  sd.e=SD_boys_play_male,
+                  n.c=N_boys,
+                  mean.c=Mean_boys_play_female,
+                  sd.c=SD_boys_play_female,
+                  data=data,
+                  studlab=paste(Study),
+                  comb.fixed = TRUE,
+                  comb.random = TRUE,
+)
+meta_boys_mixed
+```
+
+# Boys Random Effect
+
+```{r}
+boys_RE <- meta::metagen(
+             TE=Mean_boys_play_male,
+             seTE=SD_boys_play_male,
+             data=data,
+             studlab=paste(Study),
+             comb.fixed = FALSE,
+             comb.random = TRUE)
+boys_RE
+```
+
+#   Forest Plots  for FE
+
+```{r}
+boys_FE %>% forest(sortvar=Mean_boys_play_male)
+```
+
+#   Forest Plots  for RE
+
+
+```{r}
+boys_RE %>% forest(sortvar=TE)
+```
+
+# Finding what explains the results
+
+
+
+```{r}
+boys_FE %>% metareg(~ `Year` + `Country`)
+  
+```  
+
+Year variable has negative impact and statistically significant, but country is not significant.
+
+
+#   does author gender affect it?
+
+```{r}
+boys_FE %>% metareg(~ `Female authors` + `Male authors`)
+  
+```  
+
+We can see that both genders are statistically insignificant
+
+## Funnel Plot
+
+We can see that we do have 6 outliers.
+
+```{r}
+boys_FE %>% funnel()
+```
+
+And we can add some additional features, e.g. let's make it a 'contour-enhanced' funnel plot:
+
+```{r}
+contour_levels <- c(0.90, 0.95, 0.99)
+contour_colors <- c("darkblue", "blue", "lightblue")
+funnel(boys_FE, contour = contour_levels, col.contour = contour_colors)
+legend("topright", c("p < 0.10", "p < 0.05", "p < 0.01"), bty = "n", fill = contour_colors)
+```
+
+# ASSIGNMENT 
+
+1) Import the data from the `data\metaanalysis_data.xlsx` file. The data come from the meta-analysis study: [Todd et al., 2017 - Sex differences in children's toy preferences: A systematic review, meta‐regression, and meta‐analysis](https://onlinelibrary.wiley.com/doi/full/10.1002/icd.2064)
+
+The study looks at various studies of children choosing what kind of toys they play with (stereotypically 'boy-toys' or stereotypically 'girl-toys'). Mean times (in seconds) of playing are recorded, along with sample sizes and standard errors (for boys playing with each kind of toys and for girls playing with each kind of toys).
+
+There's also information about the studies (e.g. year) and a bit about quality.
+
+Here's authors' descriptions to the data:
+
+> Neutral toys (1 = neutral toys included; 2 = neutral toys not included); Parent present (1 = absent; 2 = minimal interaction; 3 = moderate or full interaction); Setting = location of study (1 = home; 2 = laboratory; 3 = nursery); Country = gender inequality index, a measure of how gender egalitarian the country was at the time the study took place.
+
+> Note. Quality is assessed using Newcastle–Ottawa Quality Assessment Scale criteria adapted for this study. A star indicates that the study fulfilled this criterion; an X indicates that the
+study did not fulfil this criterion. 
+Case definition adequate: clear justification for the gendered nature of a toy, for example, based on research. 
+Representativeness of cases: recruitment of consecutive participants. 
+Selection of controls: whether boys and girls were comparable in terms of social background.
+Parental opinion: whether parents' views on gender were measured.
+Comparability of both groups: the toys were comparable (in size, shape, etc.) and if the boys and girls were comparable in age. 
+Ascertainment of behaviour: Play behaviour was clearly defined. 
+Same ascertainment method for both groups: The measurement of the outcome (time spent playing with toy) was clearly defined. 
+Nonresponse rate: whether either nonuptake or dropout rates reported.
+
+2) Experiment using what you've learned:
+
+a) combine the effects
+b) create a funnel plot (what do you see?)
+c) check if methods / quality affect the results
+d) does author gender affect it?
