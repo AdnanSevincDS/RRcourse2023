@@ -1,5 +1,5 @@
 ---
-title: "Metaanalysis in R"
+title: "Metaanalysis assignment"
 author: "Adnan Sevinc"
 date: today
 format:  
